@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AppControllerV1Alpha1 } from './controllers/v1alpha1/app.controller';
-import { AppService } from './app.service';
+import { DomainControllerV1Alpha1 } from './presentation/controllers/v1alpha1/domain.controller';
+import { DomainUseCases } from './application/usecases/domain.usecases';
 import { ConfigModule } from '@nestjs/config';
-import { DatabaseModule } from './database/database.module';
+import { DatabaseModule } from './infrastructure/database/database.module';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { DomainSchema } from './database/schema/domain.schema';
+import { DomainSchema } from './infrastructure/database/schema/domain.schema';
 
 const ENV = process.env.NODE_ENV;
 @Module({
@@ -16,7 +16,7 @@ const ENV = process.env.NODE_ENV;
     DatabaseModule,
     SequelizeModule.forFeature([DomainSchema]),
   ],
-  controllers: [AppControllerV1Alpha1],
-  providers: [AppService],
+  controllers: [DomainControllerV1Alpha1],
+  providers: [DomainUseCases],
 })
 export class AppModule {}
