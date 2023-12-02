@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { DomainService } from '../../../application/usecases/domain.usecases';
+import { DomainUseCases } from '../../../application/usecases/domain.usecases';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { DomainDTO } from '../../../domain/dtos/rcord.dto';
+import { DomainDTO } from '../../../domain/dtos/domain.dto';
 
 @Controller({
   version: '1alpha1',
@@ -9,7 +9,7 @@ import { DomainDTO } from '../../../domain/dtos/rcord.dto';
 })
 @ApiTags('v1alpha1', 'domain')
 export class DomainControllerV1Alpha1 {
-  constructor(private readonly domainService: DomainService) {}
+  constructor(private readonly domainUseCases: DomainUseCases) {}
 
   @Get()
   health(): boolean {
@@ -18,10 +18,10 @@ export class DomainControllerV1Alpha1 {
 
   @Post('/')
   @ApiOperation({ summary: 'Add a domain' })
-  createDomain(
+  async createDomain(
     @Param() { namespace }: { namespace: string },
     @Body() data: DomainDTO,
   ) {
-    return { namespace, ...data };
+    return await this.domainUseCases.create({ account: namespace, ...data });
   }
 }
