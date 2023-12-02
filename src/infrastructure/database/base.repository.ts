@@ -1,7 +1,7 @@
 import { IRepository } from './repository.interface';
 import { Model, ModelCtor } from 'sequelize-typescript';
 
-import { Attributes, FindOptions } from 'sequelize/types';
+import { Attributes, FindOptions, WhereOptions } from 'sequelize/types';
 import { MakeNullishOptional } from 'sequelize/types/utils';
 
 export abstract class BaseRepository<TSchema extends Model>
@@ -39,6 +39,37 @@ export abstract class BaseRepository<TSchema extends Model>
     return upd[1][0];
   }
 
+  public async deleteOneById(id: Attributes<TSchema>): Promise<TSchema> {
+    const entity = await this.entityModel.findByPk(id);
+    await entity.destroy();
+    return entity;
+  }
+
+  public async paginate(options?: {
+    where?: WhereOptions<Attributes<TSchema>>;
+    page?: number;
+    offset?: number;
+    limit?: number;
+  }) {
+    const limit = options?.limit || 50;
+    const page = Math.max(options?.page - 1, 0) || 0;
+    const offset = options?.offset || page * limit || 0;
+    const result = await this.entityModel.findAndCountAll({
+      where: options?.where || {},
+      offset,
+      limit,
+      include: { all: true },
+    });
+
+    return {
+      rows: result.rows,
+      totalRows: result.count,
+      offset,
+      limit,
+      page: page || 1,
+      totalPages: Math.ceil(result.count / limit),
+    };
+  }
   public count(options?: FindOptions<Attributes<TSchema>>): Promise<number> {
     return this.entityModel.count(options);
   }
