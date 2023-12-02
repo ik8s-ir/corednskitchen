@@ -86,4 +86,50 @@ describe('Domain Usecases', () => {
     expect(domain.name).toBe(search.name);
     expect(domain.account).toBe(search.account);
   });
+
+  it('should update a domain by id', async () => {
+    // arrange
+    const namespace = '38414758787';
+    // create sample domain
+    const cd = await domainRepository.create({
+      name: 'example.org',
+      type: RecordTypeEnum.A,
+      account: namespace,
+    });
+    // act
+    const domain = await domainUseCases.update(cd.id, { name: 'example.it' });
+    // assert
+    expect(domain.name).toBe('example.it');
+  });
+
+  it('should delete a domain by id', async () => {
+    // arrange
+    const cd = await domainRepository.create({
+      name: 'example.org',
+      type: RecordTypeEnum.A,
+      account: '18414758787',
+    });
+    // act
+    const deleted = await domainUseCases.delete(cd.id);
+    // assert
+    expect(deleted.id).toBe(cd.id);
+    const domain = await domainRepository.findById(cd.id);
+    expect(domain).toBeNull();
+  });
+
+  it.only('should list domains with pagination in a namespace', async () => {
+    // arrange
+    const namespace = 'n';
+    // act
+    const domains = await domainUseCases.paginate({
+      where: { account: namespace },
+    });
+    // assert
+    expect(domains).toHaveProperty('rows');
+    expect(domains).toHaveProperty('totalRows');
+    expect(domains).toHaveProperty('limit');
+    expect(domains).toHaveProperty('offset');
+    expect(domains).toHaveProperty('page');
+    expect(domains).toHaveProperty('totalPages');
+  });
 });
