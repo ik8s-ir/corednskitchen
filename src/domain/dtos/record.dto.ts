@@ -13,7 +13,7 @@ import {
 
 import { RecordTypeEnum } from 'src/domain/@enums/record.enum';
 
-export class DomainDTO {
+export class DNSRecordDTO {
   @IsNumber()
   @IsOptional()
   domain_id?: number;

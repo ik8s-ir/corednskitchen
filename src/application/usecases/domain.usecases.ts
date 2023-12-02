@@ -1,6 +1,6 @@
 import { DomainRepository } from '../../infrastructure/database/domain.repository';
 import { Injectable } from '@nestjs/common';
-import { DomainDTO } from '../../domain/dtos/rcord.dto';
+import { DomainDTO } from '../../domain/dtos/domain.dto';
 import { DomainSchema } from 'src/infrastructure/database/schema/domain.schema';
 
 @Injectable()

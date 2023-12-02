@@ -6,7 +6,7 @@ import { DomainSchema } from '../../infrastructure/database/schema/domain.schema
 import { DomainUseCases } from './domain.usecases';
 import { Logger } from '@nestjs/common';
 import { RecordTypeEnum } from '../../domain/@enums/record.enum';
-import { DomainDTO } from '../../domain/dtos/rcord.dto';
+import { DomainDTO } from '../../domain/dtos/domain.dto';
 
 describe('Domain Usecases', () => {
   let domainRepository: DomainRepository;
