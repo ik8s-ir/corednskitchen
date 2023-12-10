@@ -7,27 +7,33 @@ import { DomainSchema } from 'src/infrastructure/database/schema/domain.schema';
 export class DomainUseCases {
   constructor(private readonly domainRepository: DomainRepository) {}
 
-  public create(
-    payload: DomainDTO & { account: string },
-  ): Promise<DomainSchema> {
+  public create(payload: DomainDTO): Promise<DomainSchema> {
     return this.domainRepository.create(payload);
   }
 
-  public read(
-    search: Partial<DomainDTO> & { account?: string },
-  ): Promise<DomainSchema> {
+  public read(search: Partial<DomainDTO>): Promise<DomainSchema> {
     return this.domainRepository.findOne({ where: search });
   }
 
-  public update(
+  public updateOneById(
     id: number | string,
     data: Partial<DomainDTO>,
   ): Promise<DomainSchema> {
     return this.domainRepository.updateOneById(id, data);
   }
+  public updateOne(
+    where: Partial<DomainDTO>,
+    data: Partial<DomainDTO>,
+  ): Promise<DomainSchema> {
+    return this.domainRepository.updateOne(where, data);
+  }
 
-  public delete(id: number | string): Promise<DomainSchema> {
+  public deleteById(id: number | string): Promise<DomainSchema> {
     return this.domainRepository.deleteOneById(id);
+  }
+
+  public deleteOne(data: Partial<DomainDTO>) {
+    return this.domainRepository.deleteOne(data);
   }
 
   public paginate(options?: {

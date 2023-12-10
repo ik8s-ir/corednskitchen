@@ -39,9 +39,35 @@ export abstract class BaseRepository<TSchema extends Model>
     return upd[1][0];
   }
 
+  public async updateOne(
+    where: WhereOptions<Attributes<TSchema>>,
+    values: Partial<TSchema>,
+  ): Promise<TSchema> {
+    const dialect = this.entityModel.sequelize.getDialect();
+    if (dialect === 'postgres') {
+      const upd = await this.entityModel.update(values, {
+        where,
+        returning: true,
+      });
+      return upd[1][0];
+    }
+    const entity = await this.findOne({ where });
+    await entity.update(values);
+    return entity;
+  }
+
   public async deleteOneById(id: Attributes<TSchema>): Promise<TSchema> {
     const entity = await this.entityModel.findByPk(id);
     await entity.destroy();
+    return entity;
+  }
+
+  public async deleteOne(
+    where: WhereOptions<Attributes<TSchema>>,
+  ): Promise<TSchema> {
+    const entity = await this.entityModel.findOne({ where });
+    await entity.destroy();
+    console.log(entity);
     return entity;
   }
 

@@ -97,8 +97,31 @@ describe('Domain Usecases', () => {
       account: namespace,
     });
     // act
-    const domain = await domainUseCases.update(cd.id, { name: 'example.it' });
+    const domain = await domainUseCases.updateOneById(cd.id, {
+      name: 'example.it',
+    });
     // assert
+    expect(domain.name).toBe('example.it');
+  });
+
+  it('should update a domain by data', async () => {
+    // arrange
+    const namespace = '38414758787';
+    // create sample domain
+    await domainRepository.create({
+      name: 'example.log',
+      type: RecordTypeEnum.A,
+      account: namespace,
+    });
+    // act
+    const domain = await domainUseCases.updateOne(
+      { name: 'example.log', account: namespace },
+      {
+        name: 'example.it',
+      },
+    );
+    // assert
+    expect(domain.account).toBe(namespace);
     expect(domain.name).toBe('example.it');
   });
 
@@ -110,14 +133,29 @@ describe('Domain Usecases', () => {
       account: '18414758787',
     });
     // act
-    const deleted = await domainUseCases.delete(cd.id);
+    const deleted = await domainUseCases.deleteById(cd.id);
     // assert
     expect(deleted.id).toBe(cd.id);
     const domain = await domainRepository.findById(cd.id);
     expect(domain).toBeNull();
   });
 
-  it.only('should list domains with pagination in a namespace', async () => {
+  it('should delete a domain by name', async () => {
+    // arrange
+    const cd = await domainRepository.create({
+      name: 'example.cloud',
+      type: RecordTypeEnum.A,
+      account: '18414758787',
+    });
+    // act
+    const deleted = await domainUseCases.deleteOne({ name: 'example.cloud' });
+    // assert
+    expect(deleted.id).toBe(cd.id);
+    const domain = await domainRepository.findById(cd.id);
+    expect(domain).toBeNull();
+  });
+
+  it('should list domains with pagination in a namespace', async () => {
     // arrange
     const namespace = 'n';
     // act
