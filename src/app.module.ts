@@ -7,6 +7,7 @@ import { DatabaseModule } from './infrastructure/database/database.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { DomainSchema } from './infrastructure/database/schema/domain.schema';
 import { DomainRepository } from './infrastructure/database/domain.repository';
+import { RolesGuard } from './presentation/guards/roles.guard';
 
 const ENV = process.env.NODE_ENV;
 @Module({
@@ -19,6 +20,6 @@ const ENV = process.env.NODE_ENV;
     SequelizeModule.forFeature([DomainSchema]),
   ],
   controllers: [HealthControllerV1Alpha1, DomainControllerV1Alpha1],
-  providers: [DomainUseCases, DomainRepository],
+  providers: [DomainUseCases, DomainRepository, RolesGuard],
 })
 export class AppModule {}

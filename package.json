@@ -31,6 +31,7 @@
     "class-validator": "^0.14.0",
     "dotenv": "^16.3.1",
     "fastify": "^4.24.3",
+    "idtoken-verifier": "^2.2.4",
     "nest-winston": "^1.9.4",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
