@@ -3,6 +3,7 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { FastifyRequest } from 'fastify';
@@ -19,6 +20,7 @@ export class RolesGuard implements CanActivate {
 
     const req: FastifyRequest = context.switchToHttp().getRequest();
     const namespace = req.params['namespace'];
+    Logger.debug(req.headers);
     if (!namespace)
       throw new BadRequestException('namespace (tenant) not supplied');
     if (!roles) {

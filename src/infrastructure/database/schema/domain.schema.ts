@@ -1,6 +1,6 @@
 import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
 
-@Table({ paranoid: false, modelName: 'domain' })
+@Table({ paranoid: false, modelName: 'domain', timestamps: false })
 export class DomainSchema extends Model {
   @Column({
     type: DataType.STRING,
