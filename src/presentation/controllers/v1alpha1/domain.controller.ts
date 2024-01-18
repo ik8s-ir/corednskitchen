@@ -18,66 +18,63 @@ import { Roles } from '../../guards/roles.decorator';
 
 @Controller({
   version: '1alpha1',
-  path: '/:namespace/domains',
+  path: '/namespaces/:namespace/domains',
 })
-@UseGuards(RolesGuard)
+// @UseGuards(RolesGuard)
 @ApiTags('v1alpha1', 'domain')
 export class DomainControllerV1Alpha1 {
   constructor(private readonly domainUseCases: DomainUseCases) {}
 
   @Post('/')
   @ApiOperation({ summary: 'Add a domain' })
-  @Roles(['owner', 'admin'])
+  // @Roles(['owner', 'admin'])
   async createDomain(
     @Param() { namespace }: { namespace: string },
     @Body() data: DomainDTO,
   ) {
-    return await this.domainUseCases.create({ account: namespace, ...data });
+    return await this.domainUseCases.create({ ...data, namespace });
   }
 
   @Get('/')
   @ApiOperation({ summary: 'get paginated domains list' })
-  @Roles(['owner', 'admin'])
+  // @Roles(['owner', 'admin'])
   async getDomains(
     @Param() { namespace }: { namespace: string },
     @Query() query: PaginationDTO,
   ) {
     return await this.domainUseCases.paginate({
       where: {
-        account: namespace,
         ...query,
+        namespace,
       },
     });
   }
 
-  @Get('/:name')
+  @Get('/:id')
   @ApiOperation({ summary: 'get a domains' })
-  @Roles(['owner', 'admin'])
+  // @Roles(['owner', 'admin'])
   async getDomain(
-    @Param() { namespace, name }: { namespace: string; name: string },
+    @Param() { namespace, id }: { namespace: string; id: number | string },
   ) {
-    return await this.domainUseCases.read({ account: namespace, name });
+    return await this.domainUseCases.read({ namespace, id });
   }
 
   @Patch('/:name')
   @ApiOperation({ summary: 'update a domains' })
-  @Roles(['owner', 'admin'])
+  // @Roles(['owner', 'admin'])
   async updteDomain(
     @Param() { namespace, name }: { namespace: string; name: string },
     @Body() data: DomainDTO,
   ) {
-    return await this.domainUseCases.updateOne(
-      { account: namespace, name },
-      data,
-    );
+    return await this.domainUseCases.updateOne({ namespace, name }, data);
   }
 
   @Delete('/:name')
   @ApiOperation({ summary: 'delete a domains' })
-  @Roles(['owner', 'admin'])
+  // @Roles(['owner', 'admin'])
   async deleteDomain(
     @Param() { namespace, name }: { namespace: string; name: string },
   ) {
-    return await this.domainUseCases.deleteOne({ account: namespace, name });
+    return await this.domainUseCases.deleteOne({ namespace, name });
   }
 }

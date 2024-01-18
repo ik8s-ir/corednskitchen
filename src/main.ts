@@ -51,7 +51,7 @@ async function bootstrap() {
     },
   );
 
-  app.setGlobalPrefix('/apis/restcoredns.ik8s.ir');
+  app.setGlobalPrefix('/apis/dns.ik8s.ir');
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

@@ -1,4 +1,5 @@
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import { DomainStatus } from '../../../domain/@enums/domain-status.enum';
 
 @Table({ paranoid: false, modelName: 'domain', timestamps: false })
 export class DomainSchema extends Model {
@@ -13,30 +14,11 @@ export class DomainSchema extends Model {
     type: DataType.STRING,
     unique: false,
   })
-  master?: string;
+  namespace?: string;
 
   @Column({
-    type: DataType.DOUBLE,
-    unique: false,
+    type: DataType.ENUM(...Object.values(DomainStatus)),
+    defaultValue: DomainStatus.PENDING,
   })
-  last_check?: number;
-
-  @Column({
-    type: DataType.STRING,
-    unique: false,
-    allowNull: false,
-  })
-  type: string;
-
-  @Column({
-    type: DataType.DOUBLE,
-    unique: false,
-  })
-  notified_serial?: number;
-
-  @Column({
-    type: DataType.STRING,
-    unique: false,
-  })
-  account?: string;
+  status: DomainStatus;
 }

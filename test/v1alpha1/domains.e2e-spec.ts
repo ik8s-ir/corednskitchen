@@ -12,6 +12,11 @@ import { DomainRepository } from '../../src/infrastructure/database/domain.repos
 import { DomainSchema } from '../../src/infrastructure/database/schema/domain.schema';
 import { DomainControllerV1Alpha1 } from '../../src/presentation/controllers/v1alpha1/domain.controller';
 import { HealthControllerV1Alpha1 } from '../../src/presentation/controllers/v1alpha1/health.controller';
+import { RolesGuard } from '../../src/presentation/guards/roles.guard';
+
+class MockRolesGuard {
+  canActivate = jest.fn().mockReturnValue(true);
+}
 
 describe('Domain controller v1alpha1 (e2e)', () => {
   let app: NestFastifyApplication;
@@ -42,7 +47,10 @@ describe('Domain controller v1alpha1 (e2e)', () => {
       ],
       controllers: [HealthControllerV1Alpha1, DomainControllerV1Alpha1],
       providers: [DomainUseCases, DomainRepository],
-    }).compile();
+    })
+      .overrideGuard(RolesGuard)
+      .useValue(new MockRolesGuard())
+      .compile();
 
     app = moduleFixture.createNestApplication<NestFastifyApplication>(
       new FastifyAdapter(),

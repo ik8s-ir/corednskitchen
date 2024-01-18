@@ -1,5 +1,4 @@
 import {
-  IsBoolean,
   IsEnum,
   IsInt,
   IsLowercase,
@@ -11,12 +10,12 @@ import {
   MaxLength,
 } from 'class-validator';
 
-import { RecordTypeEnum } from 'src/domain/@enums/record.enum';
+import { DnsRecordType } from '../../domain/@enums/dns-record-type.enum';
 
 export class DNSRecordDTO {
   @IsNumber()
   @IsOptional()
-  domain_id?: number;
+  domainId?: number;
 
   @IsString()
   @IsLowercase()
@@ -25,8 +24,8 @@ export class DNSRecordDTO {
   name: string;
 
   @IsNotEmpty()
-  @IsEnum(RecordTypeEnum)
-  type: RecordTypeEnum;
+  @IsEnum(DnsRecordType)
+  type: DnsRecordType;
 
   @IsString()
   @IsOptional()
@@ -37,18 +36,4 @@ export class DNSRecordDTO {
   @IsPositive()
   @IsInt()
   ttl?: number;
-
-  @IsNumber()
-  @IsOptional()
-  @IsPositive()
-  @IsInt()
-  prio?: number;
-
-  @IsNumber()
-  @IsOptional()
-  change_date?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  disabled?: boolean;
 }

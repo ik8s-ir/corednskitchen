@@ -5,7 +5,6 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { DomainSchema } from '../../infrastructure/database/schema/domain.schema';
 import { DomainUseCases } from './domain.usecases';
 import { Logger } from '@nestjs/common';
-import { RecordTypeEnum } from '../../domain/@enums/record.enum';
 import { DomainDTO } from '../../domain/dtos/domain.dto';
 
 describe('Domain Usecases', () => {
@@ -49,18 +48,16 @@ describe('Domain Usecases', () => {
     // create sample domain.
     await domainRepository.create({
       name: 'example.com',
-      type: RecordTypeEnum.A,
-      account: '27414758788',
+      namespace: '27414758788',
     });
   });
 
   it('should create a new domain', async () => {
     // arrange
     const namespace = '17414758787';
-    const payload: DomainDTO & { account: string } = {
+    const payload: DomainDTO & { namespace: string } = {
       name: 'example.org',
-      type: RecordTypeEnum.A,
-      account: namespace,
+      namespace,
     };
 
     // act
@@ -68,23 +65,22 @@ describe('Domain Usecases', () => {
     // assert
     expect(domain).toHaveProperty('id');
     expect(domain.name).toBe(payload.name);
-    expect(domain.type).toBe(payload.type);
-    expect(domain.account).toBe(payload.account);
+    expect(domain.namespace).toBe(payload.namespace);
   });
 
-  it('should read a domain by account and name', async () => {
+  it('should read a domain by namespace and name', async () => {
     // arrange
     const namespace = '27414758788';
-    const search: Partial<DomainDTO> & { account?: string } = {
+    const search: Partial<DomainDTO> & { namespace: string } = {
       name: 'example.com',
-      account: namespace,
+      namespace: namespace,
     };
     // act
     const domain = await domainUseCases.read(search);
     // assert
     expect(domain).toHaveProperty('id');
     expect(domain.name).toBe(search.name);
-    expect(domain.account).toBe(search.account);
+    expect(domain.namespace).toBe(search.namespace);
   });
 
   it('should update a domain by id', async () => {
@@ -93,8 +89,7 @@ describe('Domain Usecases', () => {
     // create sample domain
     const cd = await domainRepository.create({
       name: 'example.org',
-      type: RecordTypeEnum.A,
-      account: namespace,
+      namespace: namespace,
     });
     // act
     const domain = await domainUseCases.updateOneById(cd.id, {
@@ -110,18 +105,17 @@ describe('Domain Usecases', () => {
     // create sample domain
     await domainRepository.create({
       name: 'example.log',
-      type: RecordTypeEnum.A,
-      account: namespace,
+      namespace: namespace,
     });
     // act
     const domain = await domainUseCases.updateOne(
-      { name: 'example.log', account: namespace },
+      { name: 'example.log', namespace },
       {
         name: 'example.it',
       },
     );
     // assert
-    expect(domain.account).toBe(namespace);
+    expect(domain.namespace).toBe(namespace);
     expect(domain.name).toBe('example.it');
   });
 
@@ -129,8 +123,7 @@ describe('Domain Usecases', () => {
     // arrange
     const cd = await domainRepository.create({
       name: 'example.org',
-      type: RecordTypeEnum.A,
-      account: '18414758787',
+      namespace: '18414758787',
     });
     // act
     const deleted = await domainUseCases.deleteById(cd.id);
@@ -144,11 +137,13 @@ describe('Domain Usecases', () => {
     // arrange
     const cd = await domainRepository.create({
       name: 'example.cloud',
-      type: RecordTypeEnum.A,
-      account: '18414758787',
+      namespace: '18414758787',
     });
     // act
-    const deleted = await domainUseCases.deleteOne({ name: 'example.cloud' });
+    const deleted = await domainUseCases.deleteOne({
+      namespace: '18414758787',
+      name: 'example.cloud',
+    });
     // assert
     expect(deleted.id).toBe(cd.id);
     const domain = await domainRepository.findById(cd.id);
@@ -160,7 +155,7 @@ describe('Domain Usecases', () => {
     const namespace = 'n';
     // act
     const domains = await domainUseCases.paginate({
-      where: { account: namespace },
+      where: { namespace: namespace },
     });
     // assert
     expect(domains).toHaveProperty('rows');

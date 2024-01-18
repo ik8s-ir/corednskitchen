@@ -1,12 +1,23 @@
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  AllowNull,
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { DomainSchema } from './domain.schema';
+import { NonAttribute } from 'sequelize';
 
 @Table({ paranoid: false, modelName: 'record' })
 export class RecordSchema extends Model {
+  @ForeignKey(() => DomainSchema)
   @Column({
     type: DataType.DOUBLE,
-    allowNull: true,
+    allowNull: false,
   })
-  domain_id?: number;
+  domainId: number;
 
   @Column({
     type: DataType.STRING,
@@ -31,19 +42,6 @@ export class RecordSchema extends Model {
   })
   ttl?: number;
 
-  @Column({
-    type: DataType.INTEGER,
-  })
-  prio?: number;
-
-  @Column({
-    type: DataType.INTEGER,
-  })
-  change_date?: number;
-
-  @Column({
-    type: DataType.BOOLEAN,
-    defaultValue: false,
-  })
-  disabled?: boolean;
+  @BelongsTo(() => DomainSchema, 'domainId')
+  domain: NonAttribute<DomainSchema>;
 }

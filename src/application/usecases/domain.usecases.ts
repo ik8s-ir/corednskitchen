@@ -1,17 +1,21 @@
 import { DomainRepository } from '../../infrastructure/database/domain.repository';
 import { Injectable } from '@nestjs/common';
 import { DomainDTO } from '../../domain/dtos/domain.dto';
-import { DomainSchema } from 'src/infrastructure/database/schema/domain.schema';
+import { DomainSchema } from '../../infrastructure/database/schema/domain.schema';
 
 @Injectable()
 export class DomainUseCases {
   constructor(private readonly domainRepository: DomainRepository) {}
 
-  public create(payload: DomainDTO): Promise<DomainSchema> {
+  public create(
+    payload: DomainDTO & { namespace: string },
+  ): Promise<DomainSchema> {
     return this.domainRepository.create(payload);
   }
 
-  public read(search: Partial<DomainDTO>): Promise<DomainSchema> {
+  public read(
+    search: Partial<DomainDTO> & { id: number | string; namespace: string },
+  ): Promise<DomainSchema> {
     return this.domainRepository.findOne({ where: search });
   }
 
@@ -22,7 +26,7 @@ export class DomainUseCases {
     return this.domainRepository.updateOneById(id, data);
   }
   public updateOne(
-    where: Partial<DomainDTO>,
+    where: Partial<DomainDTO> & { namespace: string },
     data: Partial<DomainDTO>,
   ): Promise<DomainSchema> {
     return this.domainRepository.updateOne(where, data);
@@ -32,14 +36,14 @@ export class DomainUseCases {
     return this.domainRepository.deleteOneById(id);
   }
 
-  public deleteOne(data: Partial<DomainDTO>) {
+  public deleteOne(data: Partial<DomainDTO> & { namespace: string }) {
     return this.domainRepository.deleteOne(data);
   }
 
   public paginate(options?: {
     where?: Partial<DomainDTO> & {
       id?: number | string;
-      account?: string;
+      namespace?: string;
     };
     offset?: number;
     page?: number;
