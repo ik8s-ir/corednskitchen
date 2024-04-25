@@ -10,7 +10,6 @@ import {
 } from 'nest-winston';
 import * as winston from 'winston';
 import { AppModule } from './app.module';
-import { SwaggerTheme } from 'swagger-themes';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
@@ -65,7 +64,6 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
 
-  const theme = new SwaggerTheme('v3');
   const apiEndpoints = process.env.API_URI.split(',');
   const config = new DocumentBuilder()
     .setTitle('RESTCOREDNS')
@@ -78,10 +76,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('apidoc', app, document, {
     explorer: true,
-    customCss: `${theme.getBuffer('material')}
-    .topbar-wrapper img {content:url(\'https://cdn-icons-png.flaticon.com/512/2913/2913133.png\'); width:auto; height:80px;}
-    `,
-    customSiteTitle: 'ik8s app documentation',
+    customSiteTitle: 'ik8s dnskitchen documentation',
   });
 
   app.enableCors({ origin: '*' });

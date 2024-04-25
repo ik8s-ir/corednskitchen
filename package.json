@@ -1,8 +1,8 @@
 {
-  "name": "corednskitchen",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "name": "idnskitchen",
+  "version": "0.1.0-alpha1",
+  "description": "ik8s.ir DNS Rest API",
+  "author": "ik8s.ir",
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
@@ -38,7 +38,6 @@
     "rxjs": "^7.8.1",
     "sequelize": "^6.35.1",
     "sequelize-typescript": "^2.1.5",
-    "swagger-themes": "^1.2.30",
     "winston": "^3.11.0"
   },
   "devDependencies": {
