@@ -7,19 +7,18 @@ import {
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
-import { DomainUseCases } from '../../src/application/usecases/domain.usecases';
-import { DomainRepository } from '../../src/infrastructure/database/domain.repository';
-import { DomainSchema } from '../../src/infrastructure/database/schema/domain.schema';
-import { DomainControllerV1Alpha1 } from '../../src/presentation/controllers/v1alpha1/domain.controller';
+import { DNSRecordUseCases } from '../../src/application/usecases/dns-record.usecases';
+import { DNSRecordRepository } from '../../src/infrastructure/database/dnsrecord.repository';
+import { RecordSchema } from '../../src/infrastructure/database/schema/record.schema';
+import { DNSRecordControllerV1Alpha1 } from '../../src/presentation/controllers/v1alpha1/dnsrecord.controller';
 import { HealthControllerV1Alpha1 } from '../../src/presentation/controllers/v1alpha1/health.controller';
 import { RolesGuard } from '../../src/presentation/guards/roles.guard';
-import { RecordSchema } from '../../src/infrastructure/database/schema/record.schema';
 
 class MockRolesGuard {
   canActivate = jest.fn().mockReturnValue(true);
 }
 
-describe('Domain controller v1alpha1 (e2e)', () => {
+describe('DNSRecord controller v1alpha1 (e2e)', () => {
   let app: NestFastifyApplication;
   beforeAll(async () => {
     const ENV = process.env.NODE_ENV;
@@ -44,10 +43,10 @@ describe('Domain controller v1alpha1 (e2e)', () => {
           autoLoadModels: true,
         }),
 
-        SequelizeModule.forFeature([DomainSchema, RecordSchema]),
+        SequelizeModule.forFeature([RecordSchema]),
       ],
-      controllers: [HealthControllerV1Alpha1, DomainControllerV1Alpha1],
-      providers: [DomainUseCases, DomainRepository],
+      controllers: [HealthControllerV1Alpha1, DNSRecordControllerV1Alpha1],
+      providers: [DNSRecordUseCases, DNSRecordRepository],
     })
       .overrideGuard(RolesGuard)
       .useValue(new MockRolesGuard())
@@ -78,7 +77,7 @@ describe('Domain controller v1alpha1 (e2e)', () => {
 
   it('/:namespace/domains (GET)', () => {
     return request(app.getHttpServer())
-      .get('/v1alpha1/roya/domains')
+      .get('/v1alpha1/roya/domains/1/records')
       .expect(200)
       .expect('Content-Type', 'application/json; charset=utf-8')
       .expect((res) => {

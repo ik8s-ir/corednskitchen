@@ -1,15 +1,23 @@
 import { DNSRecordUseCases } from './../../../application/usecases/dns-record.usecases';
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DNSRecordDTO } from '../../../domain/dtos/record.dto';
-import { PaginationDTO } from 'src/domain/dtos/pagination.dto';
+import { PaginationDTO } from '../../../domain/dtos/pagination.dto';
 
 @Controller({
   version: '1alpha1',
   path: '/namespaces/:namespace/domains/:domainId/records',
 })
 @ApiTags('v1alpha1', 'dnsrecord')
-export class DNSRecordController {
+export class DNSRecordControllerV1Alpha1 {
   constructor(private readonly dnsRecordUseCases: DNSRecordUseCases) {}
 
   @Post('/')
@@ -39,5 +47,11 @@ export class DNSRecordController {
         domainId,
       },
     });
+  }
+
+  @Delete('/:id')
+  @ApiOperation({ summary: 'delete a dns record' })
+  deleteRecord(@Param() { id }: { id: number }) {
+    return this.dnsRecordUseCases.deleteById(id);
   }
 }

@@ -51,7 +51,7 @@ export class DomainControllerV1Alpha1 {
   }
 
   @Get('/:id')
-  @ApiOperation({ summary: 'get a domains' })
+  @ApiOperation({ summary: 'get a domain' })
   // @Roles(['owner', 'admin'])
   async getDomain(
     @Param() { namespace, id }: { namespace: string; id: number | string },
@@ -60,7 +60,7 @@ export class DomainControllerV1Alpha1 {
   }
 
   @Patch('/:name')
-  @ApiOperation({ summary: 'update a domains' })
+  @ApiOperation({ summary: 'update a domain' })
   // @Roles(['owner', 'admin'])
   async updteDomain(
     @Param() { namespace, name }: { namespace: string; name: string },
@@ -70,7 +70,7 @@ export class DomainControllerV1Alpha1 {
   }
 
   @Delete('/:name')
-  @ApiOperation({ summary: 'delete a domains' })
+  @ApiOperation({ summary: 'delete a domain' })
   // @Roles(['owner', 'admin'])
   async deleteDomain(
     @Param() { namespace, name }: { namespace: string; name: string },

@@ -142,4 +142,19 @@ describe('DNS Record Usecases', () => {
     expect(records.totalPages).toBe(1);
     expect(records.totalRows).toBe(20);
   });
+
+  it('should delete a dns record by id', async () => {
+    // arrange
+    const record = await RecordSchema.create({
+      name: 'recordx',
+      domainId: domain.id,
+      content: '172.16.16.5',
+      type: DnsRecordType.A,
+      ttl: 60,
+    });
+    // act
+    const deletedRecord = await useCases.deleteById(record.id);
+    // assert
+    expect(deletedRecord.id).toEqual(record.id);
+  });
 });

@@ -36,4 +36,8 @@ export class DNSRecordUseCases {
   }) {
     return this.dnsRecordRepository.paginate(options);
   }
+
+  public deleteById(id: number | string) {
+    return this.dnsRecordRepository.deleteOneById(id);
+  }
 }

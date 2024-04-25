@@ -1,5 +1,6 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
 import { DomainStatus } from '../../../domain/@enums/domain-status.enum';
+import { RecordSchema } from './record.schema';
 
 @Table({ paranoid: false, modelName: 'domain', timestamps: false })
 export class DomainSchema extends Model {
@@ -21,4 +22,7 @@ export class DomainSchema extends Model {
     defaultValue: DomainStatus.PENDING,
   })
   status: DomainStatus;
+
+  @HasMany(() => RecordSchema, 'domainId')
+  records?: RecordSchema[];
 }
