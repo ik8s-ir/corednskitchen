@@ -1,0 +1,179 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: idnskitchen
+data:
+  TLS: "true"
+  DEBUG: "true"
+  API_URI: https://dns.stg.ik8s.ir//apis/dns.ik8s.ir
+  HTTP_PORT: "443"
+  DB_TYPE: postgres
+  DB_HOST: pg-pooler.db.svc.cluster.local
+  DB_PORT: "5432"
+  DB_NAME: idns
+  DB_TIMEZONE: asia/tehran
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: idnskitchen
+data:
+  DB_USERNAME: cG9zdGdyZXM=
+  DB_PASSWORD: cG9zdGdyZXM=
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: idnskitchen
+  labels:
+    app: idnskitchen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: idnskitchen
+  template:
+    metadata:
+      labels:
+        app: idnskitchen
+    spec:
+      containers:
+      - name: idnskitchen
+        image: dr.ik8s.ir/idnskitchen:0.1.0-alpha1
+        env:
+        - name: "TLS"
+          valueFrom:
+            configMapKeyRef:
+              key: TLS
+              name: idnskitchen
+        - name: "DEBUG"
+          valueFrom:
+            configMapKeyRef:
+              key: DEBUG
+              name: idnskitchen
+        - name: "API_URI"
+          valueFrom:
+            configMapKeyRef:
+              key: API_URI
+              name: idnskitchen
+        - name: "HTTP_PORT"
+          valueFrom:
+            configMapKeyRef:
+              key: HTTP_PORT
+              name: idnskitchen
+        - name: "DB_TYPE"
+          valueFrom:
+            configMapKeyRef:
+              key: DB_TYPE
+              name: idnskitchen
+        - name: "DB_HOST"
+          valueFrom:
+            configMapKeyRef:
+              key: DB_HOST
+              name: idnskitchen
+        - name: "DB_PORT"
+          valueFrom:
+            configMapKeyRef:
+              key: DB_PORT
+              name: idnskitchen
+        - name: "DB_NAME"
+          valueFrom:
+            configMapKeyRef:
+              key: DB_NAME
+              name: idnskitchen
+        - name: "DB_TIMEZONE"
+          valueFrom:
+            configMapKeyRef:
+              key: DB_TIMEZONE
+              name: idnskitchen
+        - name: "DB_USERNAME"
+          valueFrom:
+            secretKeyRef:
+              key: DB_USERNAME
+              name: idnskitchen
+        - name: "DB_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              key: DB_PASSWORD
+              name: idnskitchen
+        - name: "TLSCA"
+          valueFrom:
+            secretKeyRef:
+              key: ca.crt
+              name: idnskitchen-tls-secret
+        - name: "TLSCERT"
+          valueFrom:
+            secretKeyRef:
+              key: tls.crt
+              name: idnskitchen-tls-secret
+        - name: "TLSKEY"
+          valueFrom:
+            secretKeyRef:
+              key: tls.key
+              name: idnskitchen-tls-secret
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: idnskitchen
+spec:
+  selector:
+    app: idnskitchen
+  ports:
+    - protocol: TCP
+      name: http
+      port: 443
+      targetPort: 443
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: idnskitchen-ca
+spec:
+  isCA: true
+  commonName: idnskitchen-ca
+  secretName: idnskitchen-tls-secret
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: idnskitchen-ca-issuer
+spec:
+  ca:
+    secretName: idnskitchen-tls-secret
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1alpha1.dns.ik8s.ir
+spec:
+  groupPriorityMinimum: 1000
+  group: dns.ik8s.ir
+  insecureSkipTLSVerify: true
+  service:
+    name: idnskitchen
+    namespace: ik8s-system
+    port: 443
+  version: v1alpha1
+  versionPriority: 15

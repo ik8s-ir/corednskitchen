@@ -1,5 +1,5 @@
 # ---------- Base ----------
-FROM dr.ik8s.ir/node:18-alpine AS base
+FROM registry.ik8s.ir/node:18-alpine AS base
 WORKDIR /coredns-kitchen
 # ---------- Build ----------
 FROM base AS builder
