@@ -12,6 +12,8 @@ import { DNSRecordControllerV1Alpha1 } from './presentation/controllers/v1alpha1
 import { DNSRecordUseCases } from './application/usecases/dns-record.usecases';
 import { DNSRecordRepository } from './infrastructure/database/dnsrecord.repository';
 import { RecordSchema } from './infrastructure/database/schema/record.schema';
+import { ScheduleModule } from '@nestjs/schedule';
+import { DomainCronJob } from './infrastructure/cronjobs/domain-cronjobs';
 
 const ENV = process.env.NODE_ENV;
 @Module({
@@ -22,6 +24,7 @@ const ENV = process.env.NODE_ENV;
     }),
     DatabaseModule,
     SequelizeModule.forFeature([DomainSchema, RecordSchema]),
+    ScheduleModule.forRoot(),
   ],
   controllers: [
     HealthControllerV1Alpha1,
@@ -33,6 +36,7 @@ const ENV = process.env.NODE_ENV;
     DNSRecordUseCases,
     DomainRepository,
     DNSRecordRepository,
+    DomainCronJob,
     RolesGuard,
   ],
 })

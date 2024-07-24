@@ -6,6 +6,7 @@ import { DomainSchema } from '../../infrastructure/database/schema/domain.schema
 import { DomainUseCases } from './domain.usecases';
 import { Logger } from '@nestjs/common';
 import { DomainDTO } from '../../domain/dtos/domain.dto';
+import { RecordSchema } from '../../infrastructure/database/schema/record.schema';
 
 describe('Domain Usecases', () => {
   let domainRepository: DomainRepository;
@@ -35,7 +36,7 @@ describe('Domain Usecases', () => {
           },
           autoLoadModels: true,
         }),
-        SequelizeModule.forFeature([DomainSchema]),
+        SequelizeModule.forFeature([DomainSchema, RecordSchema]),
       ],
       providers: [DomainUseCases, DomainRepository],
     })

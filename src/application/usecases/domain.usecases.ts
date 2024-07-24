@@ -2,19 +2,24 @@ import { DomainRepository } from '../../infrastructure/database/domain.repositor
 import { Injectable } from '@nestjs/common';
 import { DomainDTO } from '../../domain/dtos/domain.dto';
 import { DomainSchema } from '../../infrastructure/database/schema/domain.schema';
+import { DomainStatus } from 'src/domain/@enums/domain-status.enum';
+import { checkDNSServer } from '../helpers/check-dns-servers';
 
 @Injectable()
 export class DomainUseCases {
   constructor(private readonly domainRepository: DomainRepository) {}
 
-  public create(
-    payload: DomainDTO & { namespace: string },
+  public async create(
+    payload: DomainDTO & { namespace: string; status?: DomainStatus },
   ): Promise<DomainSchema> {
+    payload.status = (await checkDNSServer(payload.name))
+      ? DomainStatus.ACTIVE
+      : DomainStatus.PENDING;
     return this.domainRepository.create(payload);
   }
 
   public read(
-    search: Partial<DomainDTO> & { id: number | string; namespace: string },
+    search: Partial<DomainDTO> & { id?: number | string; namespace: string },
   ): Promise<DomainSchema> {
     return this.domainRepository.findOne({ where: search });
   }

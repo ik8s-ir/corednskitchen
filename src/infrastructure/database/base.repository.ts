@@ -24,6 +24,10 @@ export abstract class BaseRepository<TSchema extends Model>
     return this.entityModel.findOne(options);
   }
 
+  findAll(options?: FindOptions<Attributes<TSchema>>) {
+    return this.entityModel.findAll(options);
+  }
+
   public async updateOneById(
     id: Attributes<TSchema>,
     values: Partial<TSchema>,
