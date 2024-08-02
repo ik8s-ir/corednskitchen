@@ -9,6 +9,7 @@ import { DomainRepository } from '../../infrastructure/database/domain.repositor
 import { DomainSchema } from '../../infrastructure/database/schema/domain.schema';
 import { RecordSchema } from '../../infrastructure/database/schema/record.schema';
 import { DNSRecordUseCases } from './dns-record.usecases';
+import { FilterOperator } from '../../infrastructure/database/repository.interface';
 
 describe('DNS Record Usecases', () => {
   let useCases: DNSRecordUseCases;
@@ -130,7 +131,15 @@ describe('DNS Record Usecases', () => {
     );
     // act
     const records = await useCases.paginate({
-      where: { domainId: d.id },
+      where: {
+        and: [
+          {
+            field: 'domainId',
+            operator: FilterOperator.EQ,
+            value: d.id,
+          },
+        ],
+      },
     });
     // assert
     expect(records).toHaveProperty('rows');

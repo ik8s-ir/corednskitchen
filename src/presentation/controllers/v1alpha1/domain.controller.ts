@@ -15,6 +15,7 @@ import { DomainUseCases } from '../../../application/usecases/domain.usecases';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DomainDTO } from '../../../domain/dtos/domain.dto';
 import { Roles } from '../../guards/roles.decorator';
+import { FilterOperator } from '../../../infrastructure/database/repository.interface';
 
 @Controller({
   version: '1alpha1',
@@ -43,9 +44,15 @@ export class DomainControllerV1Alpha1 {
     @Query() query: PaginationDTO,
   ) {
     return await this.domainUseCases.paginate({
+      ...query,
       where: {
-        ...query,
-        namespace,
+        and: [
+          {
+            field: 'namespace',
+            operator: FilterOperator.EQ,
+            value: namespace,
+          },
+        ],
       },
     });
   }

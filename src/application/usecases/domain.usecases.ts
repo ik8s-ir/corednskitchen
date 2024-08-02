@@ -2,8 +2,14 @@ import { DomainRepository } from '../../infrastructure/database/domain.repositor
 import { Injectable } from '@nestjs/common';
 import { DomainDTO } from '../../domain/dtos/domain.dto';
 import { DomainSchema } from '../../infrastructure/database/schema/domain.schema';
-import { DomainStatus } from 'src/domain/@enums/domain-status.enum';
+import { DomainStatus } from '../../domain/@enums/domain-status.enum';
 import { checkDNSServer } from '../helpers/check-dns-servers';
+import {
+  FilterOperator,
+  IFilter,
+  ISort,
+} from '../../infrastructure/database/repository.interface';
+import { SortDirection } from '../../infrastructure/database/sort-direction.enum';
 
 @Injectable()
 export class DomainUseCases {
@@ -46,14 +52,32 @@ export class DomainUseCases {
   }
 
   public paginate(options?: {
-    where?: Partial<DomainDTO> & {
-      id?: number | string;
-      namespace?: string;
-    };
+    where?: IFilter;
     offset?: number;
     page?: number;
     limit?: number;
+    search?: string;
+    sort?: string;
+    sort_direction?: SortDirection;
   }) {
-    return this.domainRepository.paginate(options);
+    options = options || {};
+    const { offset, page, limit, sort, sort_direction, search } = options;
+    const where: IFilter = options.where || {};
+
+    if (search) {
+      where.or = [
+        { field: 'name', operator: FilterOperator.LIKE, value: `%${search}%` },
+      ];
+    }
+    const sortOptions: ISort[] = sort
+      ? [{ field: sort, direction: sort_direction || SortDirection.DESC }]
+      : [];
+    return this.domainRepository.paginate({
+      where,
+      offset,
+      page,
+      limit,
+      sort: sortOptions,
+    });
   }
 }

@@ -1,6 +1,40 @@
-import { Attributes, FindOptions, WhereOptions } from 'sequelize';
+import { Attributes, FindOptions } from 'sequelize';
 import { Model } from 'sequelize-typescript';
+import { SortDirection } from './sort-direction.enum';
 
+export enum FilterOperator {
+  EQ = 'eq',
+  NE = 'ne',
+  LIKE = 'like',
+  GT = 'gt',
+  LT = 'lt',
+  GTE = 'gte',
+  LTE = 'lte',
+  IN = 'in',
+}
+
+export interface IFilterCondition {
+  field: string;
+  operator: FilterOperator;
+  value: any;
+}
+
+export interface IFilter {
+  or?: (IFilterCondition | IFilter)[];
+  and?: (IFilterCondition | IFilter)[];
+}
+export interface IPaginateOptions {
+  where?: IFilter;
+  offset?: number;
+  page?: number;
+  limit?: number;
+  sort?: ISort[];
+}
+
+export interface ISort {
+  field: string;
+  direction: SortDirection;
+}
 export interface IRepository<TSchema extends Model> {
   create(data: Partial<TSchema>): Promise<TSchema>;
   findById(
@@ -13,12 +47,7 @@ export interface IRepository<TSchema extends Model> {
     values: Partial<TSchema>,
   ): Promise<TSchema>;
   deleteOneById(id: number | string): Promise<TSchema>;
-  paginate(options?: {
-    where?: WhereOptions<Attributes<TSchema>>;
-    page?: number;
-    offset?: number;
-    limit?: number;
-  }): Promise<{
+  paginate(options?: IPaginateOptions): Promise<{
     rows: TSchema[];
     totalRows: number;
     offset: number;

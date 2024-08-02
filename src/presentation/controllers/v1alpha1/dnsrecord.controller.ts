@@ -11,6 +11,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DNSRecordDTO } from '../../../domain/dtos/record.dto';
 import { PaginationDTO } from '../../../domain/dtos/pagination.dto';
+import { FilterOperator } from 'src/infrastructure/database/repository.interface';
 
 @Controller({
   version: '1alpha1',
@@ -42,9 +43,15 @@ export class DNSRecordControllerV1Alpha1 {
     @Param() { domainId }: { domainId: number },
   ) {
     return this.dnsRecordUseCases.paginate({
+      ...query,
       where: {
-        ...query,
-        domainId,
+        and: [
+          {
+            field: 'domainId',
+            operator: FilterOperator.EQ,
+            value: domainId,
+          },
+        ],
       },
     });
   }

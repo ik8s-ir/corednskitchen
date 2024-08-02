@@ -7,6 +7,7 @@ import { DomainUseCases } from './domain.usecases';
 import { Logger } from '@nestjs/common';
 import { DomainDTO } from '../../domain/dtos/domain.dto';
 import { RecordSchema } from '../../infrastructure/database/schema/record.schema';
+import { FilterOperator } from '../../infrastructure/database/repository.interface';
 
 describe('Domain Usecases', () => {
   let domainRepository: DomainRepository;
@@ -156,7 +157,15 @@ describe('Domain Usecases', () => {
     const namespace = 'n';
     // act
     const domains = await domainUseCases.paginate({
-      where: { namespace: namespace },
+      where: {
+        and: [
+          {
+            field: 'namespace',
+            operator: FilterOperator.EQ,
+            value: namespace,
+          },
+        ],
+      },
     });
     // assert
     expect(domains).toHaveProperty('rows');

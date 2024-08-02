@@ -2,6 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DNSRecordDTO } from '../../domain/dtos/record.dto';
 import { DNSRecordRepository } from '../../infrastructure/database/dnsrecord.repository';
 import { DomainRepository } from '../../infrastructure/database/domain.repository';
+import {
+  FilterOperator,
+  IFilter,
+  ISort,
+} from '../../infrastructure/database/repository.interface';
+import { SortDirection } from '../../infrastructure/database/sort-direction.enum';
 
 @Injectable()
 export class DNSRecordUseCases {
@@ -29,15 +35,38 @@ export class DNSRecordUseCases {
   }
 
   public paginate(options?: {
-    where?: Partial<DNSRecordDTO> & {
-      id?: number | string;
-      domainId?: number | string;
-    };
+    where?: IFilter;
     offset?: number;
     page?: number;
     limit?: number;
+    search?: string;
+    sort?: string;
+    sort_direction?: SortDirection;
   }) {
-    return this.dnsRecordRepository.paginate(options);
+    options = options || {};
+    const { offset, page, limit, sort, sort_direction, search } = options;
+    const where: IFilter = options.where || {};
+
+    if (search) {
+      where.or = [
+        { field: 'name', operator: FilterOperator.LIKE, value: `%${search}%` },
+        {
+          field: 'content',
+          operator: FilterOperator.LIKE,
+          value: `%${search}%`,
+        },
+      ];
+    }
+    const sortOptions: ISort[] = sort
+      ? [{ field: sort, direction: sort_direction || SortDirection.DESC }]
+      : [];
+    return this.dnsRecordRepository.paginate({
+      where,
+      offset,
+      page,
+      limit,
+      sort: sortOptions,
+    });
   }
 
   public deleteById(id: number | string) {

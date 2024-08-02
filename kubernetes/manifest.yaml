@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: idnskitchen
+  namespace: ik8s-system
 data:
   TLS: 'true'
   DEBUG: 'true'
@@ -12,11 +13,13 @@ data:
   DB_PORT: '5432'
   DB_NAME: idns
   DB_TIMEZONE: asia/tehran
+  NAMESERVERS: korra.ns.highscale.ir,emma.ns.highscale.ir
 ---
 apiVersion: v1
 kind: Secret
 metadata:
   name: idnskitchen
+  namespace: ik8s-system
 data:
   DB_USERNAME: cG9zdGdyZXM=
   DB_PASSWORD: cG9zdGdyZXM=
@@ -25,6 +28,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: idnskitchen
+  namespace: ik8s-system
   labels:
     app: idnskitchen
 spec:
@@ -86,6 +90,11 @@ spec:
                 configMapKeyRef:
                   key: DB_TIMEZONE
                   name: idnskitchen
+            - name: 'NAMESERVERS'
+              valueFrom:
+                configMapKeyRef:
+                  key: NAMESERVERS
+                  name: idnskitchen
             - name: 'DB_USERNAME'
               valueFrom:
                 secretKeyRef:
@@ -122,6 +131,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: ik8s-system
   name: idnskitchen
 spec:
   selector:
@@ -142,6 +152,7 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
+  namespace: ik8s-system
   name: idnskitchen-ca
 spec:
   isCA: true
@@ -154,14 +165,6 @@ spec:
     name: selfsigned-issuer
     kind: ClusterIssuer
     group: cert-manager.io
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  name: idnskitchen-ca-issuer
-spec:
-  ca:
-    secretName: idnskitchen-tls-secret
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
