@@ -17,7 +17,10 @@ export class DNSRecordUseCases {
     if (!domain) throw new NotFoundException();
     return this.dnsRecordRepository.create({
       ...record,
-      name: `${record.name}.${domain.name}`,
+      name:
+        record.name === domain.name
+          ? record.name
+          : `${record.name}.${domain.name}`,
     });
   }
 

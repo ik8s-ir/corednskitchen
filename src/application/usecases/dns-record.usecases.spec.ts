@@ -157,4 +157,21 @@ describe('DNS Record Usecases', () => {
     // assert
     expect(deletedRecord.id).toEqual(record.id);
   });
+
+  it('should separate root domain and other records.', async () => {
+    const rootRecord = await useCases.create({
+      domainId: domain.id,
+      name: 'example.com',
+      type: DnsRecordType.CNAME,
+      content: 'example.ir',
+    });
+    const regularRecord = await useCases.create({
+      domainId: domain.id,
+      name: 'xp',
+      type: DnsRecordType.CNAME,
+      content: 'example.ir',
+    });
+    expect(rootRecord.name).toBe('example.com');
+    expect(regularRecord.name).toBe('xp.example.com');
+  });
 });
