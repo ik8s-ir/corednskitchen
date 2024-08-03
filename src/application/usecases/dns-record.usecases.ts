@@ -72,4 +72,18 @@ export class DNSRecordUseCases {
   public deleteById(id: number | string) {
     return this.dnsRecordRepository.deleteOneById(id);
   }
+
+  public deleteByName(name: string) {
+    return this.dnsRecordRepository.delete({
+      where: {
+        and: [
+          {
+            field: 'name',
+            operator: FilterOperator.EQ,
+            value: name,
+          },
+        ],
+      },
+    });
+  }
 }

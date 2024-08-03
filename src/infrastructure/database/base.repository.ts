@@ -24,8 +24,9 @@ export abstract class BaseRepository<TSchema extends Model>
     return this.entityModel.findByPk(id, { plain: true, raw: true });
   }
 
-  public findOne(options?: FindOptions<Attributes<TSchema>>): Promise<TSchema> {
-    return this.entityModel.findOne(options);
+  public findOne(options?: { where: IFilter }): Promise<TSchema> {
+    const where = options.where ? this.buildWhereClause(options.where) : {};
+    return this.entityModel.findOne({ where });
   }
 
   findAll(options?: FindOptions<Attributes<TSchema>>) {
@@ -48,13 +49,13 @@ export abstract class BaseRepository<TSchema extends Model>
   }
 
   public async updateOne(
-    where: WhereOptions<Attributes<TSchema>>,
+    where: IFilter,
     values: Partial<TSchema>,
   ): Promise<TSchema> {
     const dialect = this.entityModel.sequelize.getDialect();
     if (dialect === 'postgres') {
       const upd = await this.entityModel.update(values, {
-        where,
+        where: where ? this.buildWhereClause(where) : {},
         returning: true,
       });
       return upd[1][0];
@@ -68,6 +69,11 @@ export abstract class BaseRepository<TSchema extends Model>
     const entity = await this.entityModel.findByPk(id);
     await entity.destroy();
     return entity;
+  }
+
+  public async delete(options?: { where: IFilter }): Promise<number> {
+    const where = options.where ? this.buildWhereClause(options.where) : {};
+    return this.entityModel.destroy({ where });
   }
 
   public async deleteOne(

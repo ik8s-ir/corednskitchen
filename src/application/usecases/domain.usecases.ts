@@ -27,9 +27,34 @@ export class DomainUseCases {
   public read(
     search: Partial<DomainDTO> & { id?: number | string; namespace: string },
   ): Promise<DomainSchema> {
-    return this.domainRepository.findOne({ where: search });
+    const where: IFilter = {
+      and: Object.entries(search).map(([field, value]) => ({
+        field,
+        operator: FilterOperator.EQ,
+        value,
+      })),
+    };
+    return this.domainRepository.findOne({ where });
   }
 
+  public readByName(name: string) {
+    return this.domainRepository.findOne({
+      where: {
+        and: [
+          {
+            field: 'name',
+            operator: FilterOperator.EQ,
+            value: name,
+          },
+          {
+            field: 'status',
+            operator: FilterOperator.EQ,
+            value: DomainStatus.ACTIVE,
+          },
+        ],
+      },
+    });
+  }
   public updateOneById(
     id: number | string,
     data: Partial<DomainDTO>,
@@ -40,7 +65,14 @@ export class DomainUseCases {
     where: Partial<DomainDTO> & { namespace: string },
     data: Partial<DomainDTO>,
   ): Promise<DomainSchema> {
-    return this.domainRepository.updateOne(where, data);
+    const whereClause: IFilter = {
+      and: Object.entries(where).map(([field, value]) => ({
+        field,
+        operator: FilterOperator.EQ,
+        value,
+      })),
+    };
+    return this.domainRepository.updateOne(whereClause, data);
   }
 
   public deleteById(id: number | string): Promise<DomainSchema> {

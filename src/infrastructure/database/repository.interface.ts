@@ -41,7 +41,7 @@ export interface IRepository<TSchema extends Model> {
     id: number | string,
     options?: FindOptions<Attributes<TSchema>>,
   ): Promise<TSchema>;
-  findOne(options?: FindOptions<Attributes<TSchema>>): Promise<TSchema>;
+  findOne(options?: { where: IFilter }): Promise<TSchema>;
   updateOneById(
     id: Attributes<TSchema>,
     values: Partial<TSchema>,

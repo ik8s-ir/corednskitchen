@@ -21,14 +21,14 @@ import { FilterOperator } from '../../../infrastructure/database/repository.inte
   version: '1alpha1',
   path: '/namespaces/:namespace/domains',
 })
-// @UseGuards(RolesGuard)
+@UseGuards(RolesGuard)
 @ApiTags('v1alpha1', 'domain')
 export class DomainControllerV1Alpha1 {
   constructor(private readonly domainUseCases: DomainUseCases) {}
 
   @Post('/')
   @ApiOperation({ summary: 'Add a domain' })
-  // @Roles(['owner', 'admin'])
+  @Roles(['owner', 'admin'])
   async createDomain(
     @Param() { namespace }: { namespace: string },
     @Body() data: DomainDTO,
@@ -38,7 +38,7 @@ export class DomainControllerV1Alpha1 {
 
   @Get('/')
   @ApiOperation({ summary: 'get paginated domains list' })
-  // @Roles(['owner', 'admin'])
+  @Roles(['owner', 'admin'])
   async getDomains(
     @Param() { namespace }: { namespace: string },
     @Query() query: PaginationDTO,
@@ -59,7 +59,7 @@ export class DomainControllerV1Alpha1 {
 
   @Get('/:id')
   @ApiOperation({ summary: 'get a domain' })
-  // @Roles(['owner', 'admin'])
+  @Roles(['owner', 'admin'])
   async getDomain(
     @Param() { namespace, id }: { namespace: string; id: number | string },
   ) {
@@ -68,7 +68,7 @@ export class DomainControllerV1Alpha1 {
 
   @Patch('/:name')
   @ApiOperation({ summary: 'update a domain' })
-  // @Roles(['owner', 'admin'])
+  @Roles(['owner', 'admin'])
   async updteDomain(
     @Param() { namespace, name }: { namespace: string; name: string },
     @Body() data: DomainDTO,
@@ -78,7 +78,7 @@ export class DomainControllerV1Alpha1 {
 
   @Delete('/:name')
   @ApiOperation({ summary: 'delete a domain' })
-  // @Roles(['owner', 'admin'])
+  @Roles(['owner', 'admin'])
   async deleteDomain(
     @Param() { namespace, name }: { namespace: string; name: string },
   ) {
