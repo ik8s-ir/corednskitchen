@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, ExecutionContext, Logger } from '@nestjs/common';
+import { BadRequestException, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RolesGuard } from './roles.guard';
 import { FastifyRequest } from 'fastify';
@@ -41,7 +41,7 @@ describe('RolesGuard', () => {
         getClass: jest.fn(),
       } as any;
 
-      await expect(rolesGuard.canActivate(contextMock)).rejects.toThrowError(
+      await expect(rolesGuard.canActivate(contextMock)).rejects.toThrow(
         BadRequestException,
       );
     });
@@ -59,7 +59,7 @@ describe('RolesGuard', () => {
         getClass: jest.fn(),
       } as any;
 
-      const result = await rolesGuard.canActivate(contextMock);
+      const result = rolesGuard.canActivate(contextMock);
 
       expect(result).toBe(true);
     });

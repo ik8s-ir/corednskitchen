@@ -66,22 +66,22 @@ export class DomainControllerV1Alpha1 {
     return await this.domainUseCases.read({ namespace, id });
   }
 
-  @Patch('/:name')
+  @Patch('/:id')
   @ApiOperation({ summary: 'update a domain' })
   @Roles(['owner', 'admin'])
   async updteDomain(
-    @Param() { namespace, name }: { namespace: string; name: string },
+    @Param() { namespace, id }: { namespace: string; id: number | string },
     @Body() data: DomainDTO,
   ) {
-    return await this.domainUseCases.updateOne({ namespace, name }, data);
+    return await this.domainUseCases.updateOne({ namespace, id }, data);
   }
 
-  @Delete('/:name')
+  @Delete('/:id')
   @ApiOperation({ summary: 'delete a domain' })
   @Roles(['owner', 'admin'])
   async deleteDomain(
-    @Param() { namespace, name }: { namespace: string; name: string },
+    @Param() { id, namespace }: { id: number | string; namespace: string },
   ) {
-    return await this.domainUseCases.deleteOne({ namespace, name });
+    return await this.domainUseCases.deleteOne({ id, namespace });
   }
 }

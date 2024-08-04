@@ -135,7 +135,7 @@ describe('Domain Usecases', () => {
     expect(domain).toBeNull();
   });
 
-  it('should delete a domain by name', async () => {
+  it('should delete a domain by id', async () => {
     // arrange
     const cd = await domainRepository.create({
       name: 'example.cloud',
@@ -144,7 +144,7 @@ describe('Domain Usecases', () => {
     // act
     const deleted = await domainUseCases.deleteOne({
       namespace: '18414758787',
-      name: 'example.cloud',
+      id: cd.id,
     });
     // assert
     expect(deleted.id).toBe(cd.id);

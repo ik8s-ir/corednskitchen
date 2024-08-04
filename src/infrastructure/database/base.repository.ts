@@ -81,7 +81,6 @@ export abstract class BaseRepository<TSchema extends Model>
   ): Promise<TSchema> {
     const entity = await this.entityModel.findOne({ where });
     await entity.destroy();
-    console.log(entity);
     return entity;
   }
 

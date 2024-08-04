@@ -6,7 +6,7 @@ metadata:
 data:
   TLS: 'true'
   DEBUG: 'true'
-  API_URI: https://dns.stg.ik8s.ir//apis/dns.ik8s.ir
+  API_URI: https://dns.stg.ik8s.ir/apis/dns.ik8s.ir
   HTTP_PORT: '443'
   DB_TYPE: postgres
   DB_HOST: pg-pooler.db.svc.cluster.local

@@ -79,7 +79,7 @@ export class DomainUseCases {
     return this.domainRepository.deleteOneById(id);
   }
 
-  public deleteOne(data: Partial<DomainDTO> & { namespace: string }) {
+  public deleteOne(data: { id: number | string; namespace: string }) {
     return this.domainRepository.deleteOne(data);
   }
 

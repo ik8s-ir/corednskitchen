@@ -14,7 +14,6 @@ import { DNSRecordRepository } from './infrastructure/database/dnsrecord.reposit
 import { RecordSchema } from './infrastructure/database/schema/record.schema';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DomainCronJob } from './infrastructure/cronjobs/domain-cronjobs';
-import { ACMEControllerV1Alpha1 } from './presentation/controllers/v1alpha1/acme-webhook.controller';
 
 const ENV = process.env.NODE_ENV;
 @Module({
@@ -31,7 +30,6 @@ const ENV = process.env.NODE_ENV;
     HealthControllerV1Alpha1,
     DomainControllerV1Alpha1,
     DNSRecordControllerV1Alpha1,
-    ACMEControllerV1Alpha1,
   ],
   providers: [
     DomainUseCases,
