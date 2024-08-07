@@ -62,7 +62,7 @@ export class DomainUseCases {
     return this.domainRepository.updateOneById(id, data);
   }
   public updateOne(
-    where: Partial<DomainDTO> & { namespace: string },
+    where: Partial<DomainDTO> & { id: number | string; namespace: string },
     data: Partial<DomainDTO>,
   ): Promise<DomainSchema> {
     const whereClause: IFilter = {
@@ -79,7 +79,9 @@ export class DomainUseCases {
     return this.domainRepository.deleteOneById(id);
   }
 
-  public deleteOne(data: { id: number | string; namespace: string }) {
+  public deleteOne(
+    data: Partial<DomainDTO> & { id: number | string; namespace: string },
+  ) {
     return this.domainRepository.deleteOne(data);
   }
 
