@@ -1,27 +1,53 @@
+import { EnumDnsRecordType } from '../../infrastructure/database/@enums';
 import { DomainRepository } from '../../infrastructure/database/domain.repository';
 import { Injectable } from '@nestjs/common';
 import { DomainDTO } from '../../domain/dtos/domain.dto';
 import { DomainSchema } from '../../infrastructure/database/schema/domain.schema';
 import { DomainStatus } from '../../domain/@enums/domain-status.enum';
-import { checkDNSServer } from '../helpers/check-dns-servers';
+import { checkDNSServer } from '../../infrastructure/helpers/check-dns-servers';
 import {
   FilterOperator,
   IFilter,
   ISort,
 } from '../../infrastructure/database/repository.interface';
 import { SortDirection } from '../../infrastructure/database/sort-direction.enum';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class DomainUseCases {
-  constructor(private readonly domainRepository: DomainRepository) {}
+  constructor(
+    private readonly domainRepository: DomainRepository,
+    private readonly configService: ConfigService,
+  ) {}
 
   public async create(
     payload: DomainDTO & { namespace: string; status?: DomainStatus },
   ): Promise<DomainSchema> {
-    payload.status = (await checkDNSServer(payload.name))
+    payload.status = (await checkDNSServer(
+      payload.name,
+      this.configService.getOrThrow('FQDN'),
+    ))
       ? DomainStatus.ACTIVE
       : DomainStatus.PENDING;
-    return this.domainRepository.create(payload);
+    const domain = await this.domainRepository.create(
+      {
+        ...payload,
+        records: [
+          {
+            name: '@',
+            type: EnumDnsRecordType.NS,
+            content: this.configService.getOrThrow('FQDN') + '.',
+            ttl: 3600,
+          },
+        ],
+      },
+      {
+        include: ['records'],
+      },
+    );
+    // create default NS Records.
+
+    return domain;
   }
 
   public read(

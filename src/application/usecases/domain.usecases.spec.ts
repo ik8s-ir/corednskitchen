@@ -1,4 +1,4 @@
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DomainRepository } from '../../infrastructure/database/domain.repository';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -8,11 +8,12 @@ import { Logger } from '@nestjs/common';
 import { DomainDTO } from '../../domain/dtos/domain.dto';
 import { RecordSchema } from '../../infrastructure/database/schema/record.schema';
 import { FilterOperator } from '../../infrastructure/database/repository.interface';
+import { EnumDnsRecordType } from '../../infrastructure/database/@enums';
 
 describe('Domain Usecases', () => {
   let domainRepository: DomainRepository;
   let domainUseCases: DomainUseCases;
-
+  let configService: ConfigService;
   beforeAll(async () => {
     const ENV = process.env.NODE_ENV;
 
@@ -46,6 +47,7 @@ describe('Domain Usecases', () => {
 
     domainRepository = module.get<DomainRepository>(DomainRepository);
     domainUseCases = module.get<DomainUseCases>(DomainUseCases);
+    configService = module.get<ConfigService>(ConfigService);
 
     // create sample domain.
     await domainRepository.create({
@@ -54,7 +56,7 @@ describe('Domain Usecases', () => {
     });
   });
 
-  it('should create a new domain', async () => {
+  it.only('should create a new domain and default records.', async () => {
     // arrange
     const namespace = '17414758787';
     const payload: DomainDTO & { namespace: string } = {
@@ -68,6 +70,12 @@ describe('Domain Usecases', () => {
     expect(domain).toHaveProperty('id');
     expect(domain.name).toBe(payload.name);
     expect(domain.namespace).toBe(payload.namespace);
+    expect(domain.records.length).toBeGreaterThan(0);
+    expect(domain.records[0].name).toBe('@');
+    expect(domain.records[0].type).toBe(EnumDnsRecordType.NS);
+    expect(domain.records[0].content).toBe(
+      configService.getOrThrow('FQDN') + '.',
+    );
   });
 
   it('should read a domain by namespace and name', async () => {
@@ -105,13 +113,17 @@ describe('Domain Usecases', () => {
     // arrange
     const namespace = '38414758787';
     // create sample domain
-    await domainRepository.create({
+    const createdDomain = await domainRepository.create({
       name: 'example.log',
       namespace: namespace,
     });
     // act
     const domain = await domainUseCases.updateOne(
-      { name: 'example.log', namespace },
+      {
+        id: createdDomain.id,
+        name: 'example.log',
+        namespace,
+      },
       {
         name: 'example.it',
       },
