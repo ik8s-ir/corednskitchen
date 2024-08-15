@@ -28,7 +28,7 @@ describe('RolesGuard', () => {
   });
 
   describe('canActivate', () => {
-    it('should throw BadRequestException if namespace is not supplied', async () => {
+    it('should throw BadRequestException if namespace is not supplied.', () => {
       const contextMock: ExecutionContext = {
         switchToHttp: () => ({
           getRequest: () =>
@@ -41,7 +41,7 @@ describe('RolesGuard', () => {
         getClass: jest.fn(),
       } as any;
 
-      await expect(rolesGuard.canActivate(contextMock)).rejects.toThrow(
+      expect(() => rolesGuard.canActivate(contextMock)).toThrow(
         BadRequestException,
       );
     });
