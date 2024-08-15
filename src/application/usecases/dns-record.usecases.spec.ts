@@ -1,8 +1,7 @@
-import { Logger } from '@nestjs/common';
+import { ConflictException, Logger } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Test, TestingModule } from '@nestjs/testing';
-import { DnsRecordType } from '../../domain/@enums/dns-record-type.enum';
 import { DomainStatus } from '../../domain/@enums/domain-status.enum';
 import { DNSRecordRepository } from '../../infrastructure/database/dnsrecord.repository';
 import { DomainRepository } from '../../infrastructure/database/domain.repository';
@@ -10,6 +9,7 @@ import { DomainSchema } from '../../infrastructure/database/schema/domain.schema
 import { RecordSchema } from '../../infrastructure/database/schema/record.schema';
 import { DNSRecordUseCases } from './dns-record.usecases';
 import { FilterOperator } from '../../infrastructure/database/repository.interface';
+import { EnumDnsRecordType } from '../../infrastructure/database/@enums';
 
 describe('DNS Record Usecases', () => {
   let useCases: DNSRecordUseCases;
@@ -60,7 +60,7 @@ describe('DNS Record Usecases', () => {
       domainId: domain.id,
       name: 'record1',
       content: '172.16.16.5',
-      type: DnsRecordType.A,
+      type: EnumDnsRecordType.A,
       ttl: 60,
     };
     // act
@@ -79,7 +79,7 @@ describe('DNS Record Usecases', () => {
       domainId: domain.id,
       name: '@',
       content: '172.16.16.5',
-      type: DnsRecordType.A,
+      type: EnumDnsRecordType.A,
       ttl: 60,
     });
     // assert
@@ -101,7 +101,7 @@ describe('DNS Record Usecases', () => {
       domainId: d.id,
       name: 'record1',
       content: '172.16.16.5',
-      type: DnsRecordType.A,
+      type: EnumDnsRecordType.A,
       ttl: 60,
     };
     const record = await RecordSchema.create(data);
@@ -125,7 +125,7 @@ describe('DNS Record Usecases', () => {
         name: 'record' + index,
         domainId: d.id,
         content: '172.16.16.5',
-        type: DnsRecordType.A,
+        type: EnumDnsRecordType.A,
         ttl: 60,
       })),
     );
@@ -158,7 +158,7 @@ describe('DNS Record Usecases', () => {
       name: 'recordx',
       domainId: domain.id,
       content: '172.16.16.5',
-      type: DnsRecordType.A,
+      type: EnumDnsRecordType.A,
       ttl: 60,
     });
     // act
@@ -171,16 +171,194 @@ describe('DNS Record Usecases', () => {
     const rootRecord = await useCases.create({
       domainId: domain.id,
       name: 'example.com',
-      type: DnsRecordType.CNAME,
+      type: EnumDnsRecordType.CNAME,
       content: 'example.ir',
     });
     const regularRecord = await useCases.create({
       domainId: domain.id,
       name: 'xp',
-      type: DnsRecordType.CNAME,
+      type: EnumDnsRecordType.CNAME,
       content: 'example.ir',
     });
     expect(rootRecord.name).toBe('example.com');
     expect(regularRecord.name).toBe('xp.example.com');
+  });
+
+  it('Should not create a CNAME record when there is an A record with the same name.', async () => {
+    // arrange
+
+    // create a sample A record.
+    await useCases.create({
+      domainId: domain.id,
+      name: 'roya',
+      content: '172.172.172.172',
+      type: EnumDnsRecordType.A,
+      ttl: 60,
+    });
+
+    // Act & Assert: expect the create call to throw a ConflictException
+    await expect(
+      useCases.create({
+        domainId: domain.id,
+        name: 'roya',
+        content: '172.172.172.172',
+        type: EnumDnsRecordType.CNAME,
+        ttl: 60,
+      }),
+    ).rejects.toThrow(ConflictException);
+  });
+
+  it('Should not create a CNAME record when there is an AAAA record with the same name.', async () => {
+    // arrange
+
+    // create a sample A record.
+    await useCases.create({
+      domainId: domain.id,
+      name: 'roya2',
+      content: '2001:0000:130F:0000:0000:09C0:876A:130B',
+      type: EnumDnsRecordType.AAAA,
+      ttl: 60,
+    });
+
+    // Act & Assert: expect the create call to throw a ConflictException
+    await expect(
+      useCases.create({
+        domainId: domain.id,
+        name: 'roya2',
+        content: 'ayor',
+        type: EnumDnsRecordType.CNAME,
+        ttl: 60,
+      }),
+    ).rejects.toThrow(ConflictException);
+  });
+  it('Should not create a CNAME record when there is a CNAME record with the same name.', async () => {
+    // arrange
+    await useCases.create({
+      domainId: domain.id,
+      name: 'roya3',
+      content: '2001:0000:130F:0000:0000:09C0:876A:130B',
+      type: EnumDnsRecordType.CNAME,
+      ttl: 60,
+    });
+
+    // Act & Assert: expect the create call to throw a ConflictException
+    await expect(
+      useCases.create({
+        domainId: domain.id,
+        name: 'roya3',
+        content: 'ayor',
+        type: EnumDnsRecordType.CNAME,
+        ttl: 60,
+      }),
+    ).rejects.toThrow(ConflictException);
+  });
+  it('Should not create an A record when there is a CNAME record with the same name.', async () => {
+    // arrange
+    await useCases.create({
+      domainId: domain.id,
+      name: 'roya4',
+      content: 'example.org',
+      type: EnumDnsRecordType.CNAME,
+      ttl: 60,
+    });
+
+    // Act & Assert: expect the create call to throw a ConflictException
+    await expect(
+      useCases.create({
+        domainId: domain.id,
+        name: 'roya4',
+        content: '172.1.1.1',
+        type: EnumDnsRecordType.A,
+        ttl: 60,
+      }),
+    ).rejects.toThrow(ConflictException);
+  });
+
+  it('Should not create an AAAA record when there is a CNAME record with the same name.', async () => {
+    // arrange
+    await useCases.create({
+      domainId: domain.id,
+      name: 'roya5',
+      content: 'example.org',
+      type: EnumDnsRecordType.CNAME,
+      ttl: 60,
+    });
+
+    // Act & Assert: expect the create call to throw a ConflictException
+    await expect(
+      useCases.create({
+        domainId: domain.id,
+        name: 'roya5',
+        content: '2001:0000:130F:0000:0000:09C0:876A:130B',
+        type: EnumDnsRecordType.AAAA,
+        ttl: 60,
+      }),
+    ).rejects.toThrow(ConflictException);
+  });
+
+  it('should create multiple A record with same name (load balancing).', async () => {
+    // arrange
+    const record1 = await useCases.create({
+      domainId: domain.id,
+      name: 'roya6',
+      content: '172.1.1.1',
+      type: EnumDnsRecordType.A,
+      ttl: 60,
+    });
+    // act
+    const record2 = await useCases.create({
+      domainId: domain.id,
+      name: 'roya6',
+      content: '172.1.1.2',
+      type: EnumDnsRecordType.A,
+      ttl: 60,
+    });
+    expect(record1.name).toEqual(record2.name);
+    expect(record1.content).not.toEqual(record2.content);
+  });
+
+  it('should create multiple AAAA record with same name (load balancing).', async () => {
+    // arrange
+    const record1 = await useCases.create({
+      domainId: domain.id,
+      name: 'roya7',
+      content: '2001:0000:130F:0000:0000:09C0:876A:130B',
+      type: EnumDnsRecordType.AAAA,
+      ttl: 60,
+    });
+    // act
+    const record2 = await useCases.create({
+      domainId: domain.id,
+      name: 'roya7',
+      content: '2001:0000:130F:0000:0000:09C0:876A:100A',
+      type: EnumDnsRecordType.AAAA,
+      ttl: 60,
+    });
+    expect(record1.name).toEqual(record2.name);
+    expect(record1.content).not.toEqual(record2.content);
+  });
+
+  it('should create multiple A and AAAA record with same name. (load balancing)', async () => {
+    // arrange
+    const record1 = await useCases.create({
+      domainId: domain.id,
+      name: 'roya8',
+      content: '172.1.1.19',
+      type: EnumDnsRecordType.A,
+      ttl: 60,
+    });
+    // act
+    const record2 = await useCases.create({
+      domainId: domain.id,
+      name: 'roya8',
+      content: '2001:0000:130F:0000:0000:09C0:876A:100A',
+      type: EnumDnsRecordType.AAAA,
+      ttl: 60,
+    });
+    expect(record1.name).toEqual(record2.name);
+    expect(record1.type).toBe(EnumDnsRecordType.A);
+    expect(record2.type).toBe(EnumDnsRecordType.AAAA);
+    expect(record1.content).not.toEqual(record2.content);
+    expect(record1.type).not.toEqual(record2.type);
   });
 });

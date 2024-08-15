@@ -10,7 +10,7 @@ import {
   MaxLength,
 } from 'class-validator';
 
-import { DnsRecordType } from '../../domain/@enums/dns-record-type.enum';
+import { EnumDnsRecordType } from '../../infrastructure/database/@enums';
 
 export class DNSRecordDTO {
   @IsNumber()
@@ -24,8 +24,8 @@ export class DNSRecordDTO {
   name: string;
 
   @IsNotEmpty()
-  @IsEnum(DnsRecordType)
-  type: DnsRecordType;
+  @IsEnum(EnumDnsRecordType)
+  type: EnumDnsRecordType;
 
   @IsString()
   @IsOptional()

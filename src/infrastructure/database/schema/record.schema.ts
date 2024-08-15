@@ -1,5 +1,6 @@
 import {
-  AllowNull,
+  BeforeCreate,
+  BeforeUpdate,
   BelongsTo,
   Column,
   DataType,
@@ -9,8 +10,13 @@ import {
 } from 'sequelize-typescript';
 import { DomainSchema } from './domain.schema';
 import { NonAttribute } from 'sequelize';
+import { EnumDnsRecordType } from '../@enums';
+import { ConflictException } from '@nestjs/common';
 
-@Table({ paranoid: false, modelName: 'record' })
+@Table({
+  paranoid: false,
+  modelName: 'record',
+})
 export class RecordSchema extends Model {
   @ForeignKey(() => DomainSchema)
   @Column({
@@ -26,10 +32,10 @@ export class RecordSchema extends Model {
   name: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.ENUM(...Object.values(EnumDnsRecordType)),
     allowNull: false,
   })
-  type: string;
+  type: EnumDnsRecordType;
 
   @Column({
     type: DataType.TEXT,
@@ -44,4 +50,49 @@ export class RecordSchema extends Model {
 
   @BelongsTo(() => DomainSchema, 'domainId')
   domain: NonAttribute<DomainSchema>;
+
+  @BeforeCreate
+  @BeforeUpdate
+  static async validateUniqueRecord(instance: RecordSchema) {
+    const { name, type, domainId } = instance;
+
+    // Check if there's a CNAME record for the same name
+    if (
+      type !== EnumDnsRecordType.CNAME &&
+      (type === EnumDnsRecordType.A || type === EnumDnsRecordType.AAAA)
+    ) {
+      const cnameCount = await RecordSchema.count({
+        where: {
+          name,
+          domainId,
+          type: 'CNAME',
+        },
+      });
+      if (cnameCount > 0) {
+        throw new ConflictException(
+          `Cannot add ${type} record for ${name} because a CNAME record already exists.`,
+        );
+      }
+    }
+
+    // Check if there's an A or AAAA record for the same name
+    if (type === EnumDnsRecordType.CNAME) {
+      const cnameOraOrAaaaCount = await RecordSchema.count({
+        where: {
+          name,
+          domainId,
+          type: [
+            EnumDnsRecordType.A,
+            EnumDnsRecordType.AAAA,
+            EnumDnsRecordType.CNAME,
+          ],
+        },
+      });
+      if (cnameOraOrAaaaCount > 0) {
+        throw new ConflictException(
+          `Cannot add CNAME record for ${name} because a CNAME or A or AAAA record already exists.`,
+        );
+      }
+    }
+  }
 }
