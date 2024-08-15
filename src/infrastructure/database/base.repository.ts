@@ -7,7 +7,7 @@ import {
   IRepository,
 } from './repository.interface';
 
-import { Op } from 'sequelize';
+import { CreateOptions, Op } from 'sequelize';
 import { Attributes, FindOptions, WhereOptions } from 'sequelize/types';
 import { MakeNullishOptional } from 'sequelize/types/utils';
 
@@ -16,11 +16,14 @@ export abstract class BaseRepository<TSchema extends Model>
 {
   constructor(protected readonly entityModel: ModelCtor<TSchema>) {}
 
-  public create(data: MakeNullishOptional<TSchema>): Promise<TSchema> {
-    return this.entityModel.create(data);
+  public create(
+    data: MakeNullishOptional<TSchema>,
+    options?: CreateOptions<Attributes<TSchema>>,
+  ): Promise<TSchema> {
+    return this.entityModel.create(data, options);
   }
 
-  public async findById(id: number | string): Promise<TSchema> {
+  public findById(id: number | string): Promise<TSchema> {
     return this.entityModel.findByPk(id, { plain: true, raw: true });
   }
 

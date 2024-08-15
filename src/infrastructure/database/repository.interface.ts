@@ -1,4 +1,4 @@
-import { Attributes, FindOptions } from 'sequelize';
+import { Attributes, CreateOptions, FindOptions } from 'sequelize';
 import { Model } from 'sequelize-typescript';
 import { SortDirection } from './sort-direction.enum';
 
@@ -36,7 +36,10 @@ export interface ISort {
   direction: SortDirection;
 }
 export interface IRepository<TSchema extends Model> {
-  create(data: Partial<TSchema>): Promise<TSchema>;
+  create(
+    data: Partial<TSchema>,
+    options?: CreateOptions<Attributes<TSchema>>,
+  ): Promise<TSchema>;
   findById(
     id: number | string,
     options?: FindOptions<Attributes<TSchema>>,
