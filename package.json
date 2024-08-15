@@ -80,9 +80,22 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/*.module.{js,ts}",
+      "!main.ts"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "coverageReporters": [
+      "html",
+      "text",
+      "text-summary",
+      "cobertura"
+    ],
+    "coveragePathIgnorePatterns": [
+      "domain/dtos",
+      "infrastructure",
+      "presentation"
+    ]
   }
 }
