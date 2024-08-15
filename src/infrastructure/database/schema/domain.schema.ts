@@ -1,6 +1,7 @@
 import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
 import { DomainStatus } from '../../../domain/@enums/domain-status.enum';
 import { RecordSchema } from './record.schema';
+import { MakeNullishOptional } from 'sequelize/types/utils';
 
 @Table({ paranoid: false, modelName: 'domain', timestamps: false })
 export class DomainSchema extends Model {
@@ -24,5 +25,5 @@ export class DomainSchema extends Model {
   status: DomainStatus;
 
   @HasMany(() => RecordSchema, 'domainId')
-  records?: RecordSchema[];
+  records?: MakeNullishOptional<RecordSchema>[];
 }
