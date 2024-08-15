@@ -25,21 +25,23 @@ export class DomainUseCases {
   ): Promise<DomainSchema> {
     payload.status = (await checkDNSServer(
       payload.name,
-      this.configService.getOrThrow('FQDN'),
+      this.configService.getOrThrow('NAMESERVERS'),
     ))
       ? DomainStatus.ACTIVE
       : DomainStatus.PENDING;
+    const nameservers = this.configService
+      .getOrThrow('NAMESERVERS')
+      .replace(/\s+/g, '')
+      .split(',');
     const domain = await this.domainRepository.create(
       {
         ...payload,
-        records: [
-          {
-            name: '@',
-            type: EnumDnsRecordType.NS,
-            content: this.configService.getOrThrow('FQDN') + '.',
-            ttl: 3600,
-          },
-        ],
+        records: nameservers.map((ns: string) => ({
+          name: '@',
+          type: EnumDnsRecordType.NS,
+          content: ns + '.',
+          ttl: 3600,
+        })),
       },
       {
         include: ['records'],

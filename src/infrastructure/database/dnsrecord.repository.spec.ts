@@ -1,12 +1,12 @@
-import { Logger, NotFoundException } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MakeNullishOptional } from 'sequelize/types/utils';
-import { DnsRecordType } from '../../domain/@enums/dns-record-type.enum';
 import { DomainSchema } from '../../infrastructure/database/schema/domain.schema';
 import { DNSRecordRepository } from './dnsrecord.repository';
 import { RecordSchema } from './schema/record.schema';
+import { EnumDnsRecordType } from './@enums';
 
 describe('DNSRecordRepository', () => {
   let repository: DNSRecordRepository;
@@ -50,7 +50,7 @@ describe('DNSRecordRepository', () => {
       const data: MakeNullishOptional<RecordSchema> = {
         domainId: 1,
         name: 'samplesub.example.org',
-        type: DnsRecordType.A,
+        type: EnumDnsRecordType.A,
         content: '172.16.16.7',
         ttl: 60,
       };
@@ -122,14 +122,14 @@ describe('DNSRecordRepository', () => {
       await repository.create({
         domainId: 1,
         name: 'samplesub.example.org',
-        type: DnsRecordType.A,
+        type: EnumDnsRecordType.A,
         content: '172.16.16.8',
         ttl: 60,
       });
       await repository.create({
         domainId: 1,
         name: 'samplesub.example.org',
-        type: DnsRecordType.A,
+        type: EnumDnsRecordType.A,
         content: '172.16.16.8',
         ttl: 60,
       });

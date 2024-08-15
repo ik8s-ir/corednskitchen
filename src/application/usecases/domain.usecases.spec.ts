@@ -56,7 +56,7 @@ describe('Domain Usecases', () => {
     });
   });
 
-  it.only('should create a new domain and default records.', async () => {
+  it('should create a new domain and default records.', async () => {
     // arrange
     const namespace = '17414758787';
     const payload: DomainDTO & { namespace: string } = {
@@ -74,7 +74,7 @@ describe('Domain Usecases', () => {
     expect(domain.records[0].name).toBe('@');
     expect(domain.records[0].type).toBe(EnumDnsRecordType.NS);
     expect(domain.records[0].content).toBe(
-      configService.getOrThrow('FQDN') + '.',
+      configService.getOrThrow('NAMESERVERS') + '.',
     );
   });
 

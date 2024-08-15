@@ -23,7 +23,10 @@ export class DomainCronJob {
     Promise.all(
       pendingDomains.map(async (pd) => {
         if (
-          await checkDNSServer(pd.name, this.configService.getOrThrow('FQDN'))
+          await checkDNSServer(
+            pd.name,
+            this.configService.getOrThrow('NAMESERVERS'),
+          )
         ) {
           pd.status = DomainStatus.ACTIVE;
           await pd.save();
