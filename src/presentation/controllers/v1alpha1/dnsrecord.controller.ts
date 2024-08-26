@@ -17,6 +17,7 @@ import {
 } from '../../../domain/dtos/record.dto';
 import { PaginationDTO } from '../../../domain/dtos/pagination.dto';
 import { FilterOperator } from '../../../infrastructure/database/repository.interface';
+import { DomainOwnerGuard } from '../../guards/domainowner.guard';
 import { RolesGuard } from '../../guards/roles.guard';
 import { Roles } from '../../guards/roles.decorator';
 
@@ -25,7 +26,7 @@ import { Roles } from '../../guards/roles.decorator';
   path: '/namespaces/:namespace/domains/:domainId/records',
 })
 @ApiTags('v1alpha1', 'dnsrecord')
-@UseGuards(RolesGuard)
+@UseGuards(RolesGuard, DomainOwnerGuard)
 export class DNSRecordControllerV1Alpha1 {
   constructor(private readonly dnsRecordUseCases: DNSRecordUseCases) {}
 
@@ -69,6 +70,7 @@ export class DNSRecordControllerV1Alpha1 {
 
   @Patch('/:id')
   @ApiOperation({ summary: 'patch a dns record' })
+  @Roles(['owner', 'admin'])
   updateRecord(
     @Param() { id }: { id: number },
     @Body() payload: UpdateDNSRecordDTO,
