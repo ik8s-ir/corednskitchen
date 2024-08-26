@@ -69,6 +69,9 @@ export class DNSRecordUseCases {
     });
   }
 
+  public updateById(id: number | string, data) {
+    return this.dnsRecordRepository.updateOneById(id, data);
+  }
   public deleteById(id: number | string) {
     return this.dnsRecordRepository.deleteOneById(id);
   }

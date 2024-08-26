@@ -53,6 +53,8 @@ async function bootstrap() {
   app.setGlobalPrefix('/apis/dns.ik8s.ir');
   app.useGlobalPipes(
     new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,

@@ -13,7 +13,7 @@ data:
   DB_PORT: '5432'
   DB_NAME: idns
   DB_TIMEZONE: asia/tehran
-  NAMESERVERS: korra.ns.highscale.ir,emma.ns.highscale.ir
+  NAMESERVERS: korra.ns.highscale.ir
 ---
 apiVersion: v1
 kind: Secret
@@ -43,7 +43,7 @@ spec:
     spec:
       containers:
         - name: idnskitchen
-          image: dr.ik8s.ir/idnskitchen:0.1.2-alpha1
+          image: dr.ik8s.ir/idnskitchen:0.1.4-alpha1
           env:
             - name: 'TLS'
               valueFrom:

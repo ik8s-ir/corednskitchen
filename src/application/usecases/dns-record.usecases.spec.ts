@@ -152,6 +152,24 @@ describe('DNS Record Usecases', () => {
     expect(records.totalRows).toBe(20);
   });
 
+  it('Should update a DNS record.', async () => {
+    // arrange
+    const record = await RecordSchema.create({
+      name: 'record_a1',
+      domainId: 1,
+      content: '172.16.16.5',
+      type: EnumDnsRecordType.A,
+      ttl: 60,
+    });
+    // act
+    const updated = await useCases.updateById(record.id, {
+      content: '172.16.16.6',
+    });
+
+    // assert
+    expect(updated.content).toBe('172.16.16.6');
+  });
+
   it('should delete a dns record by id', async () => {
     // arrange
     const record = await RecordSchema.create({

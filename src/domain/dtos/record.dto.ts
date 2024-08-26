@@ -37,3 +37,25 @@ export class DNSRecordDTO {
   @IsInt()
   ttl?: number;
 }
+
+export class UpdateDNSRecordDTO {
+  @IsString()
+  @IsLowercase()
+  @IsOptional()
+  @MaxLength(255)
+  name?: string;
+
+  @IsOptional()
+  @IsEnum(EnumDnsRecordType)
+  type?: EnumDnsRecordType;
+
+  @IsString()
+  @IsOptional()
+  content?: string;
+
+  @IsNumber()
+  @IsOptional()
+  @IsPositive()
+  @IsInt()
+  ttl?: number;
+}

@@ -1,4 +1,9 @@
-import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
+import {
+  HttpStatus,
+  Logger,
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import {
   FastifyAdapter,
@@ -13,6 +18,10 @@ import { RecordSchema } from '../../src/infrastructure/database/schema/record.sc
 import { DNSRecordControllerV1Alpha1 } from '../../src/presentation/controllers/v1alpha1/dnsrecord.controller';
 import { HealthControllerV1Alpha1 } from '../../src/presentation/controllers/v1alpha1/health.controller';
 import { RolesGuard } from '../../src/presentation/guards/roles.guard';
+import { DomainSchema } from '../../src/infrastructure/database/schema/domain.schema';
+import { DomainUseCases } from '../../src/application/usecases/domain.usecases';
+import { DomainRepository } from '../../src/infrastructure/database/domain.repository';
+import { EnumDnsRecordType } from '../../src/infrastructure/database/@enums';
 
 class MockRolesGuard {
   canActivate = jest.fn().mockReturnValue(true);
@@ -20,6 +29,9 @@ class MockRolesGuard {
 
 describe('DNSRecord controller v1alpha1 (e2e)', () => {
   let app: NestFastifyApplication;
+  let domainUseCases: DomainUseCases;
+  let dnsRecordUseCases: DNSRecordUseCases;
+
   beforeAll(async () => {
     const ENV = process.env.NODE_ENV;
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -43,10 +55,15 @@ describe('DNSRecord controller v1alpha1 (e2e)', () => {
           autoLoadModels: true,
         }),
 
-        SequelizeModule.forFeature([RecordSchema]),
+        SequelizeModule.forFeature([DomainSchema, RecordSchema]),
       ],
       controllers: [HealthControllerV1Alpha1, DNSRecordControllerV1Alpha1],
-      providers: [DNSRecordUseCases, DNSRecordRepository],
+      providers: [
+        DomainUseCases,
+        DNSRecordUseCases,
+        DomainRepository,
+        DNSRecordRepository,
+      ],
     })
       .overrideGuard(RolesGuard)
       .useValue(new MockRolesGuard())
@@ -55,37 +72,96 @@ describe('DNSRecord controller v1alpha1 (e2e)', () => {
     app = moduleFixture.createNestApplication<NestFastifyApplication>(
       new FastifyAdapter(),
     );
+    app.enableVersioning({
+      type: VersioningType.URI,
+    });
     app.useGlobalPipes(
       new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
         transform: true,
         transformOptions: {
           enableImplicitConversion: true,
         },
       }),
     );
-
-    app.enableVersioning({
-      type: VersioningType.URI,
-    });
+    domainUseCases = moduleFixture.get<DomainUseCases>(DomainUseCases);
+    dnsRecordUseCases = moduleFixture.get<DNSRecordUseCases>(DNSRecordUseCases);
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer()).get('/v1alpha1').expect(200);
-  });
-
-  it('/:namespace/domains (GET)', () => {
+  it('/namespaces/:namespace/domains/:domainId/records/:id (PATCH)', async () => {
+    // arrange
+    const domain = await domainUseCases.create({
+      name: 'example.com',
+      namespace: 'roya',
+    });
+    const record = await dnsRecordUseCases.create({
+      domainId: domain.id,
+      type: EnumDnsRecordType.A,
+      content: '10.10.10.1',
+      name: 'test1',
+      ttl: 3600,
+    });
+    // act
     return request(app.getHttpServer())
-      .get('/v1alpha1/roya/domains/1/records')
-      .expect(200)
+      .patch(
+        `/v1alpha1/namespaces/roya/domains/${domain.id}/records/${record.id}`,
+      )
+      .set('Content-Type', 'application/json')
+      .send({ content: '10.10.10.2' })
+      .expect(HttpStatus.OK)
       .expect('Content-Type', 'application/json; charset=utf-8')
       .expect((res) => {
-        expect(res.body).toHaveProperty('totalRows');
-        expect(res.body).toHaveProperty('offset');
-        expect(res.body).toHaveProperty('page');
-        expect(res.body).toHaveProperty('totalPages');
-        expect(res.body).toHaveProperty('rows');
+        expect(res.body.content).toBe('10.10.10.2');
+        expect(res.body.id).toBe(record.id);
       });
+  });
+
+  it('/namespaces/:namespace/domains/:domainId/records/:id (PATCH) - should not allow id change.', async () => {
+    // arrange
+    const domain = await domainUseCases.create({
+      name: 'example.com',
+      namespace: 'roya',
+    });
+    const record = await dnsRecordUseCases.create({
+      domainId: domain.id,
+      type: EnumDnsRecordType.A,
+      content: '10.10.10.1',
+      name: 'test1',
+      ttl: 3600,
+    });
+    // act
+    return request(app.getHttpServer())
+      .patch(
+        `/v1alpha1/namespaces/roya/domains/${domain.id}/records/${record.id}`,
+      )
+      .set('Content-Type', 'application/json')
+      .send({ content: '10.10.10.2', id: 12000 })
+      .expect(HttpStatus.BAD_REQUEST);
+  });
+
+  it('/namespaces/:namespace/domains/:domainId/records/:id (PATCH) - should not allow domainId change.', async () => {
+    // arrange
+    const domain = await domainUseCases.create({
+      name: 'example.com',
+      namespace: 'roya',
+    });
+    const record = await dnsRecordUseCases.create({
+      domainId: domain.id,
+      type: EnumDnsRecordType.A,
+      content: '10.10.10.1',
+      name: 'test1',
+      ttl: 3600,
+    });
+    // act
+    return request(app.getHttpServer())
+      .patch(
+        `/v1alpha1/namespaces/roya/domains/${domain.id}/records/${record.id}`,
+      )
+      .set('Content-Type', 'application/json')
+      .send({ content: '10.10.10.2', domainId: 12000 })
+      .expect(HttpStatus.BAD_REQUEST);
   });
 });

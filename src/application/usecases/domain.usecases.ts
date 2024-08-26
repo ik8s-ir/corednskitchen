@@ -47,8 +47,6 @@ export class DomainUseCases {
         include: ['records'],
       },
     );
-    // create default NS Records.
-
     return domain;
   }
 

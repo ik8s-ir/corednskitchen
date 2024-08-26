@@ -5,12 +5,16 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { DNSRecordDTO } from '../../../domain/dtos/record.dto';
+import {
+  DNSRecordDTO,
+  UpdateDNSRecordDTO,
+} from '../../../domain/dtos/record.dto';
 import { PaginationDTO } from '../../../domain/dtos/pagination.dto';
 import { FilterOperator } from '../../../infrastructure/database/repository.interface';
 import { RolesGuard } from '../../guards/roles.guard';
@@ -61,6 +65,15 @@ export class DNSRecordControllerV1Alpha1 {
         ],
       },
     });
+  }
+
+  @Patch('/:id')
+  @ApiOperation({ summary: 'patch a dns record' })
+  updateRecord(
+    @Param() { id }: { id: number },
+    @Body() payload: UpdateDNSRecordDTO,
+  ) {
+    return this.dnsRecordUseCases.updateById(id, payload);
   }
 
   @Delete('/:id')
